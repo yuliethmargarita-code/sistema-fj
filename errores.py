@@ -1,14 +1,14 @@
 import logging
 
-# Configuración del archivo de logs (Requisito: Registro de eventos y errores)
+# Configuración del archivo de logs — solo se hace UNA vez aquí
+# Así todos los archivos usan el mismo registro sin conflictos
 logging.basicConfig(
-    filename='software_fj_logs.txt', # El archivo donde se guardará todo
+    filename='software_fj_logs.txt',
     level=logging.ERROR,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
 # --- EXCEPCIONES PERSONALIZADAS (Requisito: Manejo robusto de errores) ---
-
 class SoftwareFJError(Exception):
     """Clase base para todas las excepciones del sistema Software FJ"""
     pass
