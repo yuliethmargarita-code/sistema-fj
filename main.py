@@ -1,115 +1,97 @@
+import logging
 from cliente import Cliente
-from servicio import (
-    ReservaSala,
-    AlquilerEquipo,
-    AsesoriaEspecializada
-)
+from servicio import ReservaSala, AlquilerEquipo, AsesoriaEspecializada
 from reserva import Reserva
+from errores import SoftwareFJError
 
-print("=== SISTEMA SOFTWARE FJ ===")
+# Configuración del log (Requisito indispensable de la guía)
+logging.basicConfig(
+    filename='software_fj_logs.txt',
+    level=logging.ERROR,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
+print("=== SISTEMA INTEGRAL SOFTWARE FJ ===")
 
-# OPERACIÓN 1
+# OPERACIÓN 1: Registro Exitoso
 try:
-    cliente1 = Cliente("Laura", "laura@gmail.com")
-    servicio1 = ReservaSala("Sala VIP", 100)
-
-    reserva1 = Reserva(cliente1, servicio1, 2)
-    reserva1.confirmar()
-
-    print(reserva1.mostrar_reserva())
-
+    c1 = Cliente("Laura", "laura@gmail.com")
+    s1 = ReservaSala("Sala VIP", 100000)
+    r1 = Reserva(c1, s1, 2)
+    print(f"Op 1: {r1.procesar_reserva()}")
 except Exception as e:
-    print("Error:", e)
+    logging.error(f"Error Op 1: {e}")
 
-
-# OPERACIÓN 2
+# OPERACIÓN 2: Cliente sin nombre (Error)
 try:
-    cliente2 = Cliente("", "correo@gmail.com")
-
+    c2 = Cliente("", "correo@gmail.com")
 except Exception as e:
-    print("Error cliente:", e)
+    print(f"Op 2: Error capturado - {e}")
+    logging.error(f"Error Op 2: {e}")
 
-
-# OPERACIÓN 3
+# OPERACIÓN 3: Correo inválido (Error)
 try:
-    cliente3 = Cliente("Pedro", "correo_malo")
-
+    c3 = Cliente("Pedro", "correo_malo")
 except Exception as e:
-    print("Error correo:", e)
+    print(f"Op 3: Error capturado - {e}")
+    logging.error(f"Error Op 3: {e}")
 
-
-# OPERACIÓN 4
+# OPERACIÓN 4: Alquiler de Equipo Exitoso
 try:
-    servicio2 = AlquilerEquipo("Computador Gamer", 200)
-
-    print(
-        "Costo alquiler:",
-        servicio2.calcular_costo()
-    )
-
+    s2 = AlquilerEquipo("Computador Gamer", 50000)
+    print(f"Op 4: Costo alquiler (3 días): {s2.calcular_costo(3)}")
 except Exception as e:
-    print("Error servicio:", e)
+    logging.error(f"Error Op 4: {e}")
 
-
-# OPERACIÓN 5
+# OPERACIÓN 5: Precio negativo (Error)
 try:
-    servicio3 = AsesoriaEspecializada(
-        "Asesoría Empresarial",
-        -50
-    )
-
+    s3 = AsesoriaEspecializada("Asesoría Empresarial", -50)
 except Exception as e:
-    print("Error precio:", e)
+    print(f"Op 5: Error capturado - {e}")
+    logging.error(f"Error Op 5: {e}")
 
-
-# OPERACIÓN 6
+# OPERACIÓN 6: Reserva con duración negativa (Error)
 try:
-    cliente4 = Cliente(
-        "María",
-        "maria@gmail.com"
-    )
-
-    servicio4 = ReservaSala(
-        "Sala Reuniones",
-        150
-    )
-
-    reserva2 = Reserva(
-        cliente4,
-        servicio4,
-        -3
-    )
-
+    c4 = Cliente("María", "maria@gmail.com")
+    s4 = ReservaSala("Sala Reuniones", 150000)
+    r2 = Reserva(c4, s4, -3)
+    r2.procesar_reserva()
 except Exception as e:
-    print("Error reserva:", e)
+    print(f"Op 6: Error capturado - {e}")
+    logging.error(f"Error Op 6: {e}")
 
-
-# OPERACIÓN 7
+# OPERACIÓN 7: Asesoría con Descuento (Exitoso)
 try:
-    cliente5 = Cliente(
-        "Carlos",
-        "carlos@gmail.com"
-    )
-
-    servicio5 = AsesoriaEspecializada(
-        "Consultoría",
-        300
-    )
-
-    reserva3 = Reserva(
-        cliente5,
-        servicio5,
-        5
-    )
-
-    reserva3.cancelar()
-
-    print(reserva3.mostrar_reserva())
-
+    c5 = Cliente("Carlos", "carlos@gmail.com")
+    s5 = AsesoriaEspecializada("Consultoría IT", 200000)
+    r3 = Reserva(c5, s5, 6) # 6 sesiones aplica descuento
+    print(f"Op 7: {r3.procesar_reserva()}")
 except Exception as e:
-    print("Error:", e)
+    logging.error(f"Error Op 7: {e}")
 
+# OPERACIÓN 8: Cancelación de reserva
+try:
+    r3.cancelar()
+    print(f"Op 8: {r3.mostrar_reserva()}")
+except Exception as e:
+    logging.error(f"Error Op 8: {e}")
+
+# OPERACIÓN 9: Parámetros de servicio inválidos (0 sesiones)
+try:
+    s6 = AsesoriaEspecializada("Ciberseguridad", 300000)
+    print(f"Op 9: {s6.calcular_costo(0)}")
+except Exception as e:
+    print(f"Op 9: Error capturado - {e}")
+    logging.error(f"Error Op 9: {e}")
+
+# OPERACIÓN 10: Validación final de robustez
+try:
+    print("Op 10: Validando estado final del sistema...")
+    # Intento de operación permitida
+    c_final = Cliente("Mateo", "mateo@softwarefj.com")
+    print(f"Sistema estable. Último cliente creado: {c_final.get_nombre()}")
+except Exception as e:
+    logging.error(f"Error Op 10: {e}")
 
 finally:
-    print("\nPrograma finalizado correctamente")
+    print("\nSimulación finalizada. Revisa 'software_fj_logs.txt' para ver los registros.")
