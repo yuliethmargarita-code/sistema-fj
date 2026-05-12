@@ -4,12 +4,7 @@ from servicio import ReservaSala, AlquilerEquipo, AsesoriaEspecializada
 from reserva import Reserva
 from errores import SoftwareFJError
 
-# Configuración del log (Requisito indispensable de la guía)
-logging.basicConfig(
-    filename='software_fj_logs.txt',
-    level=logging.ERROR,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# La configuración del log ya está en errores.py, no se repite aquí
 
 print("=== SISTEMA INTEGRAL SOFTWARE FJ ===")
 
@@ -43,7 +38,7 @@ try:
 except Exception as e:
     logging.error(f"Error Op 4: {e}")
 
-# OPERACIÓN 5: Precio negativo (Error)
+# OPERACIÓN 5: Precio negativo en servicio (Error)
 try:
     s3 = AsesoriaEspecializada("Asesoría Empresarial", -50)
 except Exception as e:
@@ -64,7 +59,7 @@ except Exception as e:
 try:
     c5 = Cliente("Carlos", "carlos@gmail.com")
     s5 = AsesoriaEspecializada("Consultoría IT", 200000)
-    r3 = Reserva(c5, s5, 6) # 6 sesiones aplica descuento
+    r3 = Reserva(c5, s5, 6)  # 6 sesiones aplica descuento
     print(f"Op 7: {r3.procesar_reserva()}")
 except Exception as e:
     logging.error(f"Error Op 7: {e}")
@@ -87,11 +82,9 @@ except Exception as e:
 # OPERACIÓN 10: Validación final de robustez
 try:
     print("Op 10: Validando estado final del sistema...")
-    # Intento de operación permitida
     c_final = Cliente("Mateo", "mateo@softwarefj.com")
     print(f"Sistema estable. Último cliente creado: {c_final.get_nombre()}")
 except Exception as e:
     logging.error(f"Error Op 10: {e}")
-
 finally:
     print("\nSimulación finalizada. Revisa 'software_fj_logs.txt' para ver los registros.")
