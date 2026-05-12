@@ -1,43 +1,59 @@
-from abc import ABC, abstractmethod
-from errores import ServicioError
+import logging
+from errores import ReservaError, SoftwareFJError
 
-class Servicio(ABC):
-    """Clase abstracta Servicio (Requisito POO)"""
-    def __init__(self, nombre_servicio, precio_base):
-        # Validación estricta de parámetros (Requisito de robustez)
-        if precio_base <= 0:
-            raise ServicioError("El precio base debe ser un valor positivo.")
-        
-        self.nombre_servicio = nombre_servicio
-        self.precio_base = precio_base
+class Reserva:
+    def __init__(self, cliente, servicio, duracion):
+        # Validación estricta (Requisito de la guía)
+        if duracion <= 0:
+            raise ReservaError("La duración de la reserva debe ser mayor a cero.")
+        self.cliente = cliente
+        self.servicio = servicio
+        self.duracion = duracion
+        self.estado = "Pendiente"
 
-    @abstractmethod
-    def calcular_costo(self, cantidad):
-        """Método abstracto para implementar polimorfismo"""
-        pass
+    def confirmar(self):
+        self.estado = "Confirmada"
 
-# --- IMPLEMENTACIÓN DE POLIMORFISMO (3 Servicios Especializados) ---
+    def cancelar(self):
+        self.estado = "Cancelada"
 
-class ReservaSala(Servicio):
-    def calcular_costo(self, horas):
-        if horas <= 0:
-            raise ServicioError("Las horas de reserva deben ser mayores a 0.")
-        return self.precio_base * horas
+    def procesar_reserva(self):
+        """
+        Implementa el procesamiento con los tres tipos de bloques de excepción:
+        try/except, try/except/else y try/except/finally (Requisito de la guía).
+        También aplica encadenamiento de excepciones con 'raise from'.
+        """
+        try:
+            # Calculamos el costo usando el método polimórfico del servicio
+            costo = self.servicio.calcular_costo(self.duracion)
 
-class AlquilerEquipo(Servicio):
-    def calcular_costo(self, dias):
-        if dias <= 0:
-            raise ServicioError("Los días de alquiler deben ser mayores a 0.")
-        # Simulación de un cargo fijo por seguro del equipo
-        cargo_seguro = 15000 
-        return (self.precio_base * dias) + cargo_seguro
+        except SoftwareFJError as e:
+            self.estado = "Fallida"
+            # Registro en el archivo de logs (Requisito: cada error debe registrarse)
+            logging.error(f"Error procesando reserva para {self.cliente.get_nombre()}: {e}")
+            # Encadenamiento de excepciones (Requisito de la guía)
+            raise ReservaError(f"No se pudo completar la reserva: {e}") from e
 
-class AsesoriaEspecializada(Servicio):
-    def calcular_costo(self, sesiones):
-        if sesiones <= 0:
-            raise ServicioError("El número de sesiones debe ser mayor a 0.")
-        # Sobrecarga lógica: Si son más de 5 sesiones, se aplica un 10% de descuento
-        subtotal = self.precio_base * sesiones
-        if sesiones > 5:
-            return subtotal * 0.90
-        return subtotal
+        except Exception as e:
+            # Captura cualquier otro error inesperado para mantener la estabilidad
+            logging.error(f"Error inesperado en sistema: {e}")
+            raise ReservaError("Error crítico en el procesamiento.") from e
+
+        else:
+            # Bloque else: solo se ejecuta si NO hubo ninguna excepción en el try
+            # Aquí confirmamos la reserva porque el costo se calculó sin problemas
+            self.confirmar()
+            return f"Reserva PROCESADA: {self.mostrar_reserva()} | Costo Total: ${costo}"
+
+        finally:
+            # Bloque finally: siempre se ejecuta, haya error o no
+            # Se usa para registrar que se intentó procesar la reserva
+            logging.error(f"Intento de procesamiento registrado para: {self.cliente.get_nombre()}")
+
+    def mostrar_reserva(self):
+        # Usamos el nombre del servicio y la info del cliente
+        return (
+            f"{self.cliente.mostrar_info()} | "
+            f"Servicio: {self.servicio.nombre_servicio} | "
+            f"Estado: {self.estado}"
+        )
